@@ -1,40 +1,66 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
+# AI 音乐生成器
 
-## Getting Started
+一个基于 Stability AI 的 AI 音乐生成应用，可以根据用户输入的歌词生成独特的音乐。
 
-First, run the development server:
+## 功能特点
 
+- 根据歌词生成音乐
+- 支持多种音乐风格（流行、摇滚、爵士等）
+- 可调节音乐节奏和情绪
+- 实时音频预览
+- 响应式设计
+
+## 技术栈
+
+- Next.js 14
+- React
+- TypeScript
+- Tailwind CSS
+- Stability AI API
+
+## 本地开发
+
+1. 克隆仓库：
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone [your-repository-url]
+cd ai-music-generator
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. 安装依赖：
+```bash
+npm install
+```
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+3. 创建环境变量文件：
+创建 `.env.local` 文件并添加以下内容：
+```
+STABILITY_API_KEY=your_stability_api_key_here
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXT_PUBLIC_API_URL=http://localhost:3000/api
+```
 
-[API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+4. 启动开发服务器：
+```bash
+npm run dev
+```
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) instead of React pages.
+5. 在浏览器中访问 `http://localhost:3000`
 
-This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 部署
 
-## Learn More
+本项目可以轻松部署到 Vercel：
 
-To learn more about Next.js, take a look at the following resources:
+1. Fork 本仓库
+2. 在 Vercel 中导入项目
+3. 配置环境变量
+4. 部署
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn-pages-router) - an interactive Next.js tutorial.
+## 环境变量
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `STABILITY_API_KEY`: Stability AI API 密钥
+- `NEXT_PUBLIC_APP_URL`: 应用 URL
+- `NEXT_PUBLIC_API_URL`: API URL
 
-## Deploy on Vercel
+## 许可证
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
+MIT

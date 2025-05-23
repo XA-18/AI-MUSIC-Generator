@@ -1,20 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Music, Play, Pause, Download, Loader2, Volume2, Settings } from 'lucide-react';
+import { Music, Volume2, Settings } from 'lucide-react';
 import AudioPlayer from '@/components/AudioPlayer';
 import { MusicAPI } from '@/lib/api';
-import { MusicGenerationRequest } from '@/types/music';
 import LoadingSpinner from './LoadingSpinner';
-
-interface GeneratedMusic {
-  id: string;
-  audioUrl: string;
-  lyrics: string;
-  title: string;
-  style: string;
-  status: 'generating' | 'completed' | 'failed';
-}
 
 export default function MusicGenerator() {
   const [lyrics, setLyrics] = useState('');
@@ -25,7 +15,6 @@ export default function MusicGenerator() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const [generatedMusic, setGeneratedMusic] = useState<GeneratedMusic[]>([]);
   const [currentPlaying, setCurrentPlaying] = useState<string | null>(null);
 
   const musicStyles = [
@@ -224,7 +213,7 @@ export default function MusicGenerator() {
               <ul className="space-y-1 text-sm">
                 <li>• 在左侧输入你想要的歌词</li>
                 <li>• 选择音乐风格、节奏和情绪</li>
-                <li>• 点击"生成音乐"按钮</li>
+                <li>• 点击&quot;生成音乐&quot;按钮</li>
                 <li>• 等待AI为你创作独特的音乐</li>
               </ul>
             </div>

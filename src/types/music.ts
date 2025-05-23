@@ -40,7 +40,7 @@ export interface MusicPlayerState {
 export interface MusicGenerationError {
   code: string;
   message: string;
-  details?: any;
+  details?: Record<string, unknown>;
 }
 
 export interface MusicGenerationProgress {

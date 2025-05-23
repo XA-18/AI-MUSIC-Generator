@@ -36,7 +36,7 @@ export async function OPTIONS() {
 }
 
 // 处理 GET 请求
-export async function GET(request: NextRequest) {
+export async function GET() {
   return NextResponse.json(
     { success: false, error: 'Method not allowed' },
     { status: 405, headers: corsHeaders }

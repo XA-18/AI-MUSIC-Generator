@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { MusicGenerationRequest, MusicGenerationResponse } from '@/types/music';
 
 // MusicGen模型版本
 const MUSICGEN_VERSIONS = {
@@ -42,99 +43,55 @@ export async function GET(request: NextRequest) {
   );
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
-    const { lyrics, style, tempo, mood, duration = 30 }: MusicGenRequest = await request.json();
-    
-    if (!lyrics?.trim()) {
-      return NextResponse.json(
-        { success: false, error: '歌词不能为空' },
-        { 
-          status: 400,
-          headers: corsHeaders
-        }
-      );
-    }
+    const body = await request.json() as MusicGenerationRequest;
+    const { lyrics, style, tempo, mood, duration } = body;
 
-    // 验证 API 密钥
-    if (!process.env.STABILITY_API_KEY) {
-      console.error('STABILITY_API_KEY is not set in environment variables');
-      return NextResponse.json(
-        { success: false, error: 'API key not configured' },
-        { status: 500, headers: corsHeaders }
-      );
-    }
+    // 构建提示词
+    const prompt = `Generate a ${style} music with ${tempo} tempo and ${mood} mood based on these lyrics: ${lyrics}`;
 
-    // 构建音乐生成提示词
-    const prompt = buildMusicPrompt({ lyrics, style, tempo, mood });
-    
-    console.log('Generating music with prompt:', prompt);
-
-    // 创建 FormData
-    const formData = new FormData();
-    formData.append('prompt', prompt);
-    formData.append('duration', Math.min(duration, 30).toString());
-    formData.append('cfg_scale', '7');
-    formData.append('seed', Math.floor(Math.random() * 1000000).toString());
-    formData.append('output_format', 'mp3');
-
-    // 打印请求参数用于调试（不包含 API 密钥）
-    console.log('Request parameters:', {
-      prompt: prompt,
-      duration: Math.min(duration, 30),
-      cfg_scale: 7,
-      seed: Math.floor(Math.random() * 1000000),
-      output_format: 'mp3'
-    });
-
-    // 创建 Stability AI 音频生成请求
-    const response = await fetch('https://api.stability.ai/v2beta/audio/stable-audio-2/text-to-audio', {
+    // 调用 Stability AI API
+    const response = await fetch('https://api.stability.ai/v1/generation/stable-audio-1.0/text-to-music', {
       method: 'POST',
       headers: {
+        'Content-Type': 'application/json',
         'Authorization': `Bearer ${process.env.STABILITY_API_KEY}`,
-        'Accept': 'audio/*'
       },
-      body: formData,
+      body: JSON.stringify({
+        text_prompt: prompt,
+        duration: duration,
+        cfg_scale: 7,
+        seed: Math.floor(Math.random() * 1000000),
+        output_format: 'mp3'
+      }),
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      console.error('Stability AI API error details:', errorData);
-      console.error('Request headers:', {
-        'Authorization': 'Bearer [HIDDEN]',
-        'Accept': 'audio/*'
-      });
-      throw new Error(`Stability AI API error: ${response.status} - ${JSON.stringify(errorData)}`);
+      const error = await response.json();
+      console.error('Stability AI API error:', error);
+      return NextResponse.json(
+        { error: 'Failed to generate music' },
+        { status: response.status }
+      );
     }
 
-    // 获取音频数据
-    const audioBuffer = await response.arrayBuffer();
-    const base64Audio = Buffer.from(audioBuffer).toString('base64');
+    const audioData = await response.arrayBuffer();
+    const base64Audio = Buffer.from(audioData).toString('base64');
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        id: Date.now().toString(),
-        status: 'succeeded',
-        audioUrl: `data:audio/mp3;base64,${base64Audio}`,
-        prompt,
-        created_at: new Date().toISOString()
-      }
-    }, { 
-      headers: corsHeaders 
-    });
+    const responseData: MusicGenerationResponse = {
+      id: Date.now().toString(),
+      status: 'succeeded',
+      created_at: new Date().toISOString(),
+      audio: `data:audio/mp3;base64,${base64Audio}`,
+    };
 
+    return NextResponse.json(responseData);
   } catch (error) {
-    console.error('Music generation error:', error);
+    console.error('Error generating music:', error);
     return NextResponse.json(
-      { 
-        success: false, 
-        error: error instanceof Error ? error.message : '音乐生成失败'
-      },
-      { 
-        status: 500,
-        headers: corsHeaders
-      }
+      { error: 'Internal server error' },
+      { status: 500 }
     );
   }
 }

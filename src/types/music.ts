@@ -3,19 +3,14 @@ export interface MusicGenerationRequest {
   style: string;
   tempo: string;
   mood: string;
-  duration?: number;
+  duration: number;
 }
 
 export interface MusicGenerationResponse {
-  success: boolean;
-  data?: {
-    id: string;
-    status: 'succeeded' | 'failed';
-    audioUrl?: string;
-    prompt?: string;
-    seed?: number;
-    created_at: string;
-  };
+  id: string;
+  status: 'succeeded' | 'failed';
+  created_at: string;
+  audio: string;
   error?: string;
 }
 
@@ -53,4 +48,12 @@ export interface MusicGenerationProgress {
   progress: number;
   message?: string;
   error?: MusicGenerationError;
+}
+
+export interface AudioPlayerProps {
+  audioUrl: string;
+}
+
+export interface LoadingSpinnerProps {
+  size?: 'small' | 'medium' | 'large';
 } 

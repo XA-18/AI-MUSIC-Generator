@@ -22,7 +22,7 @@ export default function MusicGenerator() {
   const [tempo, setTempo] = useState('medium');
   const [mood, setMood] = useState('happy');
   const [duration, setDuration] = useState(30);
-  const [isGenerating, setIsGenerating] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [generatedMusic, setGeneratedMusic] = useState<GeneratedMusic[]>([]);
@@ -38,9 +38,9 @@ export default function MusicGenerator() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     setError(null);
     setAudioUrl(null);
-    setIsGenerating(true);
 
     try {
       const response = await MusicAPI.generateMusic({
@@ -51,16 +51,15 @@ export default function MusicGenerator() {
         duration
       });
 
-      if (response.success && response.data.audioUrl) {
-        setAudioUrl(response.data.audioUrl);
+      if (response.audio) {
+        setAudioUrl(response.audio);
       } else {
-        throw new Error(response.error || '生成失败');
+        throw new Error('No audio data received');
       }
-    } catch (error) {
-      console.error('Music generation error:', error);
-      setError(error instanceof Error ? error.message : '生成失败');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '生成音乐时出错');
     } finally {
-      setIsGenerating(false);
+      setIsLoading(false);
     }
   };
 
@@ -94,23 +93,25 @@ export default function MusicGenerator() {
             
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label className="block text-white font-medium mb-2">歌词</label>
+                <label htmlFor="lyrics" className="block text-white font-medium mb-2">歌词</label>
                 <textarea
-                  className="w-full h-32 p-4 rounded-lg bg-white/20 border border-white/30 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
-                  placeholder="在这里输入你的歌词..."
+                  id="lyrics"
                   value={lyrics}
                   onChange={(e) => setLyrics(e.target.value)}
+                  className="w-full h-32 p-4 rounded-lg bg-white/20 border border-white/30 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
+                  placeholder="在这里输入你的歌词..."
                   required
                 />
               </div>
 
               <div className="grid md:grid-cols-3 gap-4 mb-6">
                 <div>
-                  <label className="block text-white font-medium mb-2">音乐风格</label>
+                  <label htmlFor="style" className="block text-white font-medium mb-2">音乐风格</label>
                   <select
-                    className="w-full p-3 rounded-lg bg-white/20 border border-white/30 text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    id="style"
                     value={style}
                     onChange={(e) => setStyle(e.target.value)}
+                    className="w-full p-3 rounded-lg bg-white/20 border border-white/30 text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
                   >
                     {musicStyles.map(s => (
                       <option key={s} value={s.toLowerCase()} className="bg-gray-800">
@@ -121,11 +122,12 @@ export default function MusicGenerator() {
                 </div>
 
                 <div>
-                  <label className="block text-white font-medium mb-2">节奏</label>
+                  <label htmlFor="tempo" className="block text-white font-medium mb-2">节奏</label>
                   <select
-                    className="w-full p-3 rounded-lg bg-white/20 border border-white/30 text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    id="tempo"
                     value={tempo}
                     onChange={(e) => setTempo(e.target.value)}
+                    className="w-full p-3 rounded-lg bg-white/20 border border-white/30 text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
                   >
                     {tempos.map(t => (
                       <option key={t} value={t.toLowerCase()} className="bg-gray-800">
@@ -136,11 +138,12 @@ export default function MusicGenerator() {
                 </div>
 
                 <div>
-                  <label className="block text-white font-medium mb-2">情绪</label>
+                  <label htmlFor="mood" className="block text-white font-medium mb-2">情绪</label>
                   <select
-                    className="w-full p-3 rounded-lg bg-white/20 border border-white/30 text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    id="mood"
                     value={mood}
                     onChange={(e) => setMood(e.target.value)}
+                    className="w-full p-3 rounded-lg bg-white/20 border border-white/30 text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
                   >
                     {moods.map(m => (
                       <option key={m} value={m.toLowerCase()} className="bg-gray-800">
@@ -151,13 +154,14 @@ export default function MusicGenerator() {
                 </div>
 
                 <div>
-                  <label className="block text-white font-medium mb-2">时长（秒）</label>
+                  <label htmlFor="duration" className="block text-white font-medium mb-2">时长（秒）</label>
                   <input
                     type="number"
+                    id="duration"
                     value={duration}
                     onChange={(e) => setDuration(Number(e.target.value))}
                     min={10}
-                    max={30}
+                    max={60}
                     className="w-full p-3 rounded-lg bg-white/20 border border-white/30 text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
                   />
                 </div>
@@ -165,10 +169,10 @@ export default function MusicGenerator() {
 
               <button
                 type="submit"
-                disabled={isGenerating}
+                disabled={isLoading}
                 className="w-full py-4 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:from-gray-500 disabled:to-gray-600 disabled:cursor-not-allowed text-white font-bold rounded-lg transition-all duration-300 flex items-center justify-center"
               >
-                {isGenerating ? (
+                {isLoading ? (
                   <div className="flex items-center justify-center">
                     <LoadingSpinner />
                     <span className="ml-2">生成中...</span>
